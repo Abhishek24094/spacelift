@@ -6,9 +6,9 @@ terraform {
   source = "../../../../../Terraform/templates/atlas/sqs"
 }
 
-# Generate main.tf with correct module path
-generate "main_override" {
-  path      = "main_override.tf"
+# Generate module.tf with correct module path
+generate "module" {
+  path      = "module.tf"
   if_exists = "overwrite_terragrunt"
   contents  = <<EOF
 module "sqs_queue" {
