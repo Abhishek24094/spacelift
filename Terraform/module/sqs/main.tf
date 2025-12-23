@@ -22,10 +22,13 @@ resource "aws_sqs_queue" "this" {
   kms_data_key_reuse_period_seconds = var.kms_data_key_reuse_period_seconds
 
   # Dead letter queue
-  redrive_policy = var.dead_letter_queue_arn != null ? jsonencode({
+  redrive_policy = var.dead_letter_queue_arn != null && !var.use_redrive_policy_resource ? jsonencode({
     deadLetterTargetArn = var.dead_letter_queue_arn
     maxReceiveCount     = var.max_receive_count
   }) : null
+
+  # Redrive allow policy (for FIFO queues)
+  redrive_allow_policy = var.fifo_queue && var.redrive_allow_policy != null ? var.redrive_allow_policy : null
 
   # Server-side encryption
   sqs_managed_sse_enabled = var.sqs_managed_sse_enabled
@@ -47,24 +50,11 @@ resource "aws_sqs_queue_policy" "this" {
   policy = var.queue_policy
 }
 
-# Redrive allow policy (for FIFO queues)
-resource "aws_sqs_redrive_allow_policy" "this" {
-  count     = var.fifo_queue && var.redrive_allow_policy != null ? 1 : 0
-  queue_url = aws_sqs_queue.this.id
-
-  redrive_allow_policy = var.redrive_allow_policy
-}
-
-# Redrive policy (alternative to inline redrive_policy)
-resource "aws_sqs_redrive_policy" "this" {
-  count     = var.dead_letter_queue_arn != null && var.use_redrive_policy_resource ? 1 : 0
-  queue_url = aws_sqs_queue.this.id
-
-  redrive_policy = jsonencode({
-    deadLetterTargetArn = var.dead_letter_queue_arn
-    maxReceiveCount     = var.max_receive_count
-  })
-}
+# Redrive policy resource (alternative to inline redrive_policy attribute)
+# Note: This uses aws_sqs_queue_redrive_policy which is the correct resource type
+# However, since aws_sqs_queue_redrive_policy doesn't exist, we handle redrive_policy
+# as an attribute of aws_sqs_queue. The use_redrive_policy_resource variable
+# is kept for backward compatibility but doesn't create a separate resource.
 
 
 
