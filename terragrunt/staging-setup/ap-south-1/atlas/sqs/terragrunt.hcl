@@ -97,7 +97,7 @@ inputs = {
     Environment = "staging"
     Region      = "ap-south-1"
     Project     = "atlas"
-    ManagedBy   = "terraform"
+    ManagedBy   = "terraformer"
   }
 }
 
