@@ -7,6 +7,9 @@ terraform {
       version = ">= 4.0"
     }
   }
+
+  # Backend configuration - Spacelift will configure this
+  backend "s3" {}
 }
 
 

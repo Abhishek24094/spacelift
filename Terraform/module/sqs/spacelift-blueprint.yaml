@@ -1,0 +1,244 @@
+stack:
+  name: ${{ inputs.stack_name }}
+  key: ${{ inputs.stack_key }}
+  space: ${{ inputs.space || "root" }}
+  description: |
+    AWS SQS Queue Stack
+    A comprehensive Terraform stack for creating AWS SQS queues that supports both 
+    standard and FIFO queues with all possible configuration options.
+
+  labels:
+    - aws
+    - sqs
+    - messaging
+    - queue
+
+  vcs:
+    branch: ${{ inputs.branch || "main" }}
+    repository: ${{ inputs.repository }}
+    provider: ${{ inputs.vcs_provider || "GITHUB" }}
+
+  vendor:
+    terraform:
+      manage_state: true
+      version: ">= 1.0"
+      providers:
+        aws:
+          source: "hashicorp/aws"
+          version: ">= 4.0"
+
+  terraform:
+    providers:
+      aws:
+        source: "hashicorp/aws"
+        version: ">= 4.0"
+
+  inputs:
+    aws_region: ${{ inputs.aws_region || "us-east-1" }}
+    queue_name: ${{ inputs.queue_name }}
+    fifo_queue: ${{ inputs.fifo_queue || false }}
+    content_based_deduplication: ${{ inputs.content_based_deduplication || false }}
+    deduplication_scope: ${{ inputs.deduplication_scope || "queue" }}
+    fifo_throughput_limit: ${{ inputs.fifo_throughput_limit || "perQueue" }}
+    visibility_timeout_seconds: ${{ inputs.visibility_timeout_seconds || 30 }}
+    message_retention_seconds: ${{ inputs.message_retention_seconds || 345600 }}
+    delay_seconds: ${{ inputs.delay_seconds || 0 }}
+    receive_wait_time_seconds: ${{ inputs.receive_wait_time_seconds || 0 }}
+    kms_master_key_id: ${{ inputs.kms_master_key_id }}
+    kms_data_key_reuse_period_seconds: ${{ inputs.kms_data_key_reuse_period_seconds || 300 }}
+    dead_letter_queue_arn: ${{ inputs.dead_letter_queue_arn }}
+    max_receive_count: ${{ inputs.max_receive_count || 3 }}
+    sqs_managed_sse_enabled: ${{ inputs.sqs_managed_sse_enabled || false }}
+    queue_policy: ${{ inputs.queue_policy }}
+    redrive_allow_policy: ${{ inputs.redrive_allow_policy }}
+    use_redrive_policy_resource: ${{ inputs.use_redrive_policy_resource || false }}
+    tags: ${{ inputs.tags || {} }}
+
+inputs:
+  - id: stack_name
+    name: Stack Name
+    description: "The name of the Spacelift stack"
+    type:
+      - string
+    required: true
+
+  - id: stack_key
+    name: Stack Key
+    description: "A unique identifier/key for the stack"
+    type:
+      - string
+    required: true
+
+  - id: repository
+    name: Repository
+    description: "The Git repository URL or name"
+    type:
+      - string
+    required: true
+
+  - id: space
+    name: Space
+    description: "The Spacelift space where the stack will be created (default: root)"
+    type:
+      - string
+    default: "root"
+
+  - id: branch
+    name: Branch
+    description: "The Git branch to use (default: main)"
+    type:
+      - string
+    default: "main"
+
+  - id: vcs_provider
+    name: VCS Provider
+    description: "The version control system provider (default: GITHUB)"
+    type:
+      - string
+    default: "GITHUB"
+    options:
+      - GITHUB
+      - GITLAB
+      - BITBUCKET_DATACENTER
+      - BITBUCKET_CLOUD
+      - AZURE_DEVOPS
+      - AWS_CODE_COMMIT
+
+  - id: aws_region
+    name: AWS Region
+    description: "The AWS region where the SQS queue will be created"
+    type:
+      - string
+    default: "us-east-1"
+
+  - id: queue_name
+    name: Queue Name
+    description: "The name of the SQS queue"
+    type:
+      - string
+    required: true
+
+  - id: fifo_queue
+    name: FIFO Queue
+    description: "Boolean designating a FIFO queue. If not set, it defaults to false making it a standard queue"
+    type:
+      - bool
+    default: false
+
+  - id: content_based_deduplication
+    name: Content Based Deduplication
+    description: "Enables content-based deduplication for FIFO queues"
+    type:
+      - bool
+    default: false
+
+  - id: deduplication_scope
+    name: Deduplication Scope
+    description: "Specifies whether message deduplication occurs at the message group or queue level"
+    type:
+      - string
+    default: "queue"
+    options:
+      - messageGroup
+      - queue
+
+  - id: fifo_throughput_limit
+    name: FIFO Throughput Limit
+    description: "Specifies whether the FIFO queue throughput quota applies to the entire queue or per message group"
+    type:
+      - string
+    default: "perQueue"
+    options:
+      - perQueue
+      - perMessageGroupId
+
+  - id: visibility_timeout_seconds
+    name: Visibility Timeout (seconds)
+    description: "The visibility timeout for the queue. An integer from 0 to 43200 (12 hours)"
+    type:
+      - number
+    default: 30
+
+  - id: message_retention_seconds
+    name: Message Retention (seconds)
+    description: "The number of seconds Amazon SQS retains a message. Integer from 60 (1 minute) to 1209600 (14 days)"
+    type:
+      - number
+    default: 345600
+
+  - id: delay_seconds
+    name: Delay Seconds
+    description: "The time in seconds that the delivery of all messages in the queue will be delayed. An integer from 0 to 900 (15 minutes)"
+    type:
+      - number
+    default: 0
+
+  - id: receive_wait_time_seconds
+    name: Receive Wait Time (seconds)
+    description: "The time for which a ReceiveMessage call will wait for a message to arrive (long polling). An integer from 0 to 20 (seconds)"
+    type:
+      - number
+    default: 0
+
+  - id: kms_master_key_id
+    name: KMS Master Key ID
+    description: "The ID of an AWS-managed customer master key (CMK) for Amazon SQS or a custom CMK"
+    type:
+      - string
+      - null
+
+  - id: kms_data_key_reuse_period_seconds
+    name: KMS Data Key Reuse Period (seconds)
+    description: "The length of time, in seconds, for which Amazon SQS can reuse a data key. Integer between 60 (1 minute) and 86,400 (24 hours)"
+    type:
+      - number
+    default: 300
+
+  - id: dead_letter_queue_arn
+    name: Dead Letter Queue ARN
+    description: "The ARN of the dead-letter queue to which Amazon SQS moves messages after maxReceiveCount is exceeded"
+    type:
+      - string
+      - null
+
+  - id: max_receive_count
+    name: Max Receive Count
+    description: "The number of times a message is delivered to the source queue before being moved to the dead-letter queue"
+    type:
+      - number
+    default: 3
+
+  - id: sqs_managed_sse_enabled
+    name: SQS Managed SSE Enabled
+    description: "Boolean to enable server-side encryption (SSE) of message content with SQS-owned encryption keys"
+    type:
+      - bool
+    default: false
+
+  - id: queue_policy
+    name: Queue Policy
+    description: "The JSON policy for the SQS queue"
+    type:
+      - string
+      - null
+
+  - id: redrive_allow_policy
+    name: Redrive Allow Policy
+    description: "The JSON policy to set up the RedriveAllowPolicy parameter"
+    type:
+      - string
+      - null
+
+  - id: use_redrive_policy_resource
+    name: Use Redrive Policy Resource
+    description: "Whether to use the aws_sqs_redrive_policy resource instead of inline redrive_policy"
+    type:
+      - bool
+    default: false
+
+  - id: tags
+    name: Tags
+    description: "A map of tags to assign to the queue (JSON object)"
+    type:
+      - object
+    default: {}
