@@ -1,7 +1,7 @@
 variable "aws_region" {
   description = "The AWS region where the SQS queue will be created"
   type        = string
-  default     = "us-east-1"
+  default     = "ap-south-1"
 }
 
 variable "queue_name" {

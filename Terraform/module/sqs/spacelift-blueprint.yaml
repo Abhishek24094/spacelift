@@ -26,6 +26,13 @@ stack:
         aws:
           source: "hashicorp/aws"
           version: ">= 4.0"
+      backend:
+        s3:
+          bucket: ${{ inputs.state_bucket || "staging-setup-cloud-platform" }}
+          key: sqs/${{ inputs.queue_name }}/terraform.tfstate
+          region: ${{ inputs.aws_region || "ap-south-1" }}
+          encrypt: true
+          dynamodb_table: ${{ inputs.state_lock_table || "terraform_lock_test" }}
 
   terraform:
     providers:
@@ -34,7 +41,7 @@ stack:
         version: ">= 4.0"
 
   inputs:
-    aws_region: ${{ inputs.aws_region || "us-east-1" }}
+    aws_region: ${{ inputs.aws_region || "ap-south-1" }}
     queue_name: ${{ inputs.queue_name }}
     fifo_queue: ${{ inputs.fifo_queue || false }}
     content_based_deduplication: ${{ inputs.content_based_deduplication || false }}
@@ -109,7 +116,21 @@ inputs:
     description: "The AWS region where the SQS queue will be created"
     type:
       - string
-    default: "us-east-1"
+    default: "ap-south-1"
+
+  - id: state_bucket
+    name: State Bucket
+    description: "The S3 bucket name for storing Terraform state (default: staging-setup-cloud-platform)"
+    type:
+      - string
+    default: "staging-setup-cloud-platform"
+
+  - id: state_lock_table
+    name: State Lock Table
+    description: "The DynamoDB table name for Terraform state locking (default: terraform_lock_test)"
+    type:
+      - string
+    default: "terraform_lock_test"
 
   - id: queue_name
     name: Queue Name
