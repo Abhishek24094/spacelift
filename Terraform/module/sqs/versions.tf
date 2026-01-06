@@ -19,7 +19,6 @@ terraform {
   backend "s3" {
     # These values will be provided by Spacelift backend configuration
     # Key should be: sqs/${var.queue_name}/terraform.tfstate
-    backend = "s3"
    bucket  = "staging-setup-cloud-platform"
    key     = "sqs/${var.queue_name}/terraform.tfstate"
    region  = "ap-south-1"
