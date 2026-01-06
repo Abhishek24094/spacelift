@@ -8,23 +8,17 @@ terraform {
     }
   }
 
-  # Backend configuration - Spacelift will configure this
-  # Recommended backend configuration in Spacelift:
-  # backend = "s3"
-  # bucket  = <TF_STATE_BUCKET> (e.g., "staging-setup-cloud-platform")
-  # key     = "sqs/${var.queue_name}/terraform.tfstate" (uses queue name in path)
-  # region  = <AWS_REGION> (e.g., "ap-south-1")
-  # encrypt = true
-  # dynamodb_table = <TF_STATE_LOCK_TABLE> (e.g., "terraform_lock_test")
-  backend "s3" {
-    # These values will be provided by Spacelift backend configuration
-    # Key should be: sqs/${var.queue_name}/terraform.tfstate
-   bucket  = "staging-setup-cloud-platform"
-   key     = "sqs/${var.queue_name}/terraform.tfstate"
-   region  = "ap-south-1"
-  encrypt = true
-  dynamodb_table = "terraform_lock_test"
-  }
+  # Backend configuration - Spacelift will automatically generate state-credentials.tf
+  # with the backend configuration. Keep this empty to avoid conflicts.
+  # 
+  # In Spacelift stack settings, configure the backend with:
+  # - Backend: s3
+  # - Bucket: staging-setup-cloud-platform (or use state_bucket input variable)
+  # - Key: sqs/${var.queue_name}/terraform.tfstate (uses queue name in path)
+  # - Region: ap-south-1 (or use aws_region input variable)
+  # - Encrypt: true
+  # - DynamoDB Table: terraform_lock_test (or use state_lock_table input variable)
+  backend "s3" {}
 }
 
 
